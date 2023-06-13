@@ -1,15 +1,28 @@
+import { useDispatch, useSelector } from 'react-redux';
 import css from './Contactlist.module.css';
-import PropTypes from 'prop-types';
+import { getFilter, selectContacts } from 'redux/selectors';
+import { deleteContact } from 'redux/contactsSlice';
 
-export const ContactList = ({ contacts, deleteContact }) => {
+export const ContactList = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
+  const filter = useSelector(getFilter);
+
+  const visibleContactList = () => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLocaleLowerCase())
+    );
+  };
+
+  const visibleContacts = visibleContactList();
   return (
     <ul className={css.list}>
-      {contacts?.map(contact => (
+      {visibleContacts?.map(contact => (
         <li key={contact.id} className={css.item}>
           {contact.name} - {contact.number}
           <button
             className={css.btnDelete}
-            onClick={() => deleteContact(contact.id)}
+            onClick={() => dispatch(deleteContact(contact.id))}
           >
             Delete
           </button>
@@ -17,15 +30,4 @@ export const ContactList = ({ contacts, deleteContact }) => {
       ))}
     </ul>
   );
-};
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      number: PropTypes.string,
-    })
-  ),
-  filter: PropTypes.string,
-  handleFilterChange: PropTypes.func,
 };
